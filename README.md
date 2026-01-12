@@ -11,5 +11,5 @@ PyTorch $f$-divergence estimation via variational bounds optimization.
 
 ## Mutual Information Neural Estimation
 
-PyTorch-FD can be used to estimate the mutual information between random vectors $X$ and $Y$ via estimating $D_\text{KL}(\mathbb{P}_{X,Y} \Vert \mathbb{P}_X \otimes \mathbb{P}_Y)$.
+PyTorch-FD can be used to estimate the mutual information between random vectors $X$ and $Y$ via estimating $\mathsf{KL}[\mathbb{P}_{X,Y} \Vert \mathbb{P}_X \otimes \mathbb{P}_Y]$.
 See [`mutual_information.py`](./source/python/torchfd/mutual_information.py).

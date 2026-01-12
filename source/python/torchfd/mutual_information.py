@@ -60,17 +60,14 @@ class OuterProductMarginalizer(Marginalizer):
         function: Callable[[Any, torch.Tensor, torch.Tensor], torch.Tensor]
     ) -> tuple[torch.Tensor, torch.Tensor]:
         batch_size = x.shape[0]
-        
-        x_repeat_shape = [1 for i in range(len(x.shape))]
-        x_repeat_shape[0] = y.shape[0]
 
-        x_repeated = x.repeat(x_repeat_shape)
-        y_repeated = y.repeat_interleave(x.shape[0], dim=0)
+        x_repeated = x.unsqueeze(0).expand(batch_size, -1, *((-1,) * (len(x.shape) - 1)))
+        y_repeated = y.unsqueeze(1).expand(-1, batch_size, *((-1,) * (len(y.shape) - 1)))
 
         T_marginal = function(x_repeated, y_repeated)
-        T_joined = torch.diag(T_marginal.view((batch_size, batch_size))) # A shortcut to avoid needless computation.
+        T_joint = torch.diag(T_marginal) # A shortcut to avoid needless computation.
         
-        return T_joined, T_marginal
+        return T_joint, T_marginal
 
 
 class MINE(torch.nn.Module):
@@ -161,8 +158,8 @@ class MINE(torch.nn.Module):
     def marginalized(
         function: Callable[[Any, torch.Tensor, torch.Tensor], torch.Tensor]
     ) -> Callable[[Any, torch.Tensor, torch.Tensor], torch.Tensor]:
-        def wrapped(self, x, y):
-            return self.marginalizer(x, y, lambda x, y : function(self, x, y))
+        def wrapped(self, x, y, *args, **kwargs):
+            return self.marginalizer(x, y, lambda x, y : function(self, x, y, *args, **kwargs))
 
         return wrapped
 

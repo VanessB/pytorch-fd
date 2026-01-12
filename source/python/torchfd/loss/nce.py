@@ -34,6 +34,5 @@ class InfoNCELoss(BaseVariationalBoundLoss):
 
         batch_size = T_joint.shape[0]
         T_product = T_product.view((batch_size, batch_size))
-        #T_joint = torch.diag(T_product) # TODO: remove this trick? Already implemented in OuterProductMarginalizer.
         
-        return torch.mean(torch.logsumexp(T_product - T_joint, dim=-1)) - math.log(batch_size)
+        return torch.mean(torch.logsumexp(T_product - T_joint, dim=-2)) - math.log(batch_size)
