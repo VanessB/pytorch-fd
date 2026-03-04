@@ -53,6 +53,18 @@ class OuterProductMarginalizer(Marginalizer):
            Contrastive Predictive Coding". arXiv:1807.03748
     """
 
+    def __init__(self, flatten: bool=False) -> None:
+        """
+        Parameters
+        ----------
+        flatten : bool, optional
+            
+        """
+
+        super().__init__()
+        
+        self.flatten = flatten
+
     def __call__(
         self,
         x: torch.Tensor,
@@ -64,7 +76,11 @@ class OuterProductMarginalizer(Marginalizer):
         x_repeated = x.unsqueeze(0).expand(batch_size, -1, *((-1,) * (len(x.shape) - 1)))
         y_repeated = y.unsqueeze(1).expand(-1, batch_size, *((-1,) * (len(y.shape) - 1)))
 
-        T_marginal = function(x_repeated, y_repeated)
+        if self.flatten:
+            x_repeated = x_repeated.reshape(batch_size * batch_size, *x.shape[1:])
+            y_repeated = y_repeated.reshape(batch_size * batch_size, *y.shape[1:])
+
+        T_marginal = function(x_repeated, y_repeated).view(batch_size, batch_size)        
         T_joint = torch.diag(T_marginal) # A shortcut to avoid needless computation.
         
         return T_joint, T_marginal
